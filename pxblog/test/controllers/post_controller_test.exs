@@ -2,20 +2,18 @@ defmodule Pxblog.PostControllerTest do
   use Pxblog.ConnCase
 
   alias Pxblog.Post
-  alias Pxblog.User
+  alias Pxblog.TestHelper
+
   @valid_attrs %{body: "some content", title: "some content"}
   @invalid_attrs %{}
 
   setup do
-    {:ok, user} = create_user
+    {:ok, role} = TestHelper.create_role(%{name: "User Role", admin: false})
+    {:ok, user} = TestHelper.create_user(role, %{email: "test@example.com", username: "testuser", password: "test1234", password_confirmation: "test1234"})
+    {:ok, post} = TestHelper.create_post(user, %{title: "Test Post", body: "Test Body"})
     conn = build_conn()
     |> login_user(user)
-    {:ok, conn: conn, user: user}
-  end
-
-  defp create_user do
-    User.changeset(%User{}, %{email: "test@example.com", username: "testuser", password: "test1234", password_confirmation: "test1234"})
-    |> Repo.insert
+    {:ok, conn: conn, user: user, role: role, post: post}
   end
 
   defp login_user(conn, user) do
@@ -43,18 +41,9 @@ defmodule Pxblog.PostControllerTest do
     assert html_response(conn, 200) =~ "New post"
   end
 
-  test "shows chosen resource", %{conn: conn, user: user} do
-    post = build_post(user)
+  test "shows chosen resource", %{conn: conn, user: user, post: post} do
     conn = get conn, user_post_path(conn, :show, user, post)
     assert html_response(conn, 200) =~ "Show post"
-  end
-
-  defp build_post(user) do
-    changeset =
-      user
-      |> build_assoc(:posts)
-      |> Post.changeset(@valid_attrs)
-    Repo.insert!(changeset)
   end
 
   test "renders page not found when id is nonexistent", %{conn: conn, user: user} do
@@ -63,27 +52,23 @@ defmodule Pxblog.PostControllerTest do
     end
   end
 
-  test "renders form for editing chosen resource", %{conn: conn, user: user} do
-    post = build_post(user)
+  test "renders form for editing chosen resource", %{conn: conn, user: user, post: post} do
     conn = get conn, user_post_path(conn, :edit, user, post)
     assert html_response(conn, 200) =~ "Edit post"
   end
 
-  test "updates chosen resource and redirects when data is valid", %{conn: conn, user: user} do
-    post = build_post(user)
+  test "updates chosen resource and redirects when data is valid", %{conn: conn, user: user, post: post} do
     conn = put conn, user_post_path(conn, :update, user, post), post: @valid_attrs
     assert redirected_to(conn) == user_post_path(conn, :show, user, post)
     assert Repo.get_by(Post, @valid_attrs)
   end
 
-  test "does not update chosen resource and renders errors when data is invalid", %{conn: conn, user: user} do
-    post = build_post(user)
+  test "does not update chosen resource and renders errors when data is invalid", %{conn: conn, user: user, post: post} do
     conn = put conn, user_post_path(conn, :update, user, post), post: %{"body" => nil}
     assert html_response(conn, 200) =~ "Edit post"
   end
 
-  test "deletes chosen resource", %{conn: conn, user: user} do
-    post = build_post(user)
+  test "deletes chosen resource", %{conn: conn, user: user, post: post} do
     conn = delete conn, user_post_path(conn, :delete, user, post)
     assert redirected_to(conn) == user_post_path(conn, :index, user)
     refute Repo.get(Post, post.id)
@@ -96,10 +81,8 @@ defmodule Pxblog.PostControllerTest do
     assert conn.halted
   end
 
-  test "redirects when trying to edit a post for a different user", %{conn: conn, user: user} do
-    other_user = User.changeset(%User{}, %{email: "test2@example.com", username: "testuser2", password: "test1234", password_confirmation: "test1234"})
-    |> Repo.insert!
-    post = build_post(user)
+  test "redirects when trying to edit a post for a different user", %{conn: conn, role: role, post: post} do
+    {:ok, other_user} = TestHelper.create_user(role, %{email: "test2@example.com", username: "testuser2", password: "test1234", password_confirmation: "test1234"})
     conn = get conn, user_post_path(conn, :edit, other_user, post)
     assert get_flash(conn, :error) == "You are not authorized to modify that post!"
     assert redirected_to(conn) == page_path(conn, :index)
