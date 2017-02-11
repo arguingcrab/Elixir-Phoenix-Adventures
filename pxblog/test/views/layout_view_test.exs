@@ -10,7 +10,7 @@ defmodule Pxblog.LayoutViewTest do
   setup do
     User.changeset(%User{}, %{username: "testuser", password: "test1234", password_confirmation: "test1234", email: "test@example.com"})
     |> Repo.insert
-    {:ok, conn:build_conn()}
+    {:ok, conn: build_conn()}
   end
 
   test "current user returns the user in the session", %{conn: conn} do

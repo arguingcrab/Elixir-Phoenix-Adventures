@@ -5,7 +5,7 @@ defmodule Pxblog.SessionController do
   alias Pxblog.User
 
   # Import comeonin/bcrypt mod arity/2
-  import Comeonin.Bcrypt, only: [checkpw: 2]
+  import Comeonin.Bcrypt, only: [checkpw: 2, dummy_checkpw: 0]
 
   # Func that cleans usr input; ie: blank = nil
   plug :scrub_params, "user" when action in [:create]
@@ -18,17 +18,28 @@ defmodule Pxblog.SessionController do
   @doc """
   Repo.get_by(User, username: "bob")
   """
-  def create(conn, %{"user" => user_params}) do
-    # Pull first applicable User from Ecto-Repo w/ matching username; else nil
-    Repo.get_by(User, username: user_params["username"])
-    |> sign_in(user_params["password"], conn)
+  def create(conn, %{"user" => %{"username" => username, "password" => password}})
+   when not is_nil(username) and not is_nil(password) do
+      user = Repo.get_by(User, username: username)
+      sign_in(user, password, conn)
+  end
+
+  def create(conn, _) do
+    failed_login(conn)
+  end
+
+  defp failed_login(conn) do
+    dummy_checkpw()
+    conn
+    |> put_session(:current_user, nil)
+    |> put_flash(:error, "Invalid username/password combination!")
+    |> redirect(to: page_path(conn, :index))
+    |> halt()
   end
 
   # If user is nil, redirect to :index with flash msg
   defp sign_in(user, password, conn) when is_nil(user) do
-    conn
-    |> put_flash(:error, "Invalid username/password combination!")
-    |> redirect(to: page_path(conn, :index))
+    failed_login(conn)
   end
 
   @doc """
@@ -42,10 +53,7 @@ defmodule Pxblog.SessionController do
       |> put_flash(:info, "Sign in successful!")
       |> redirect(to: page_path(conn, :index))
     else
-      conn
-      |> put_session(:current_user, nil)
-      |> put_flash(:error, "nvalid username/password combination!")
-      |> redirect(to: page_path(conn, :index))
+      failed_login(conn)
     end
   end
 

@@ -32,7 +32,7 @@ defmodule Pxblog.SessionControllerTest do
   test "does not create a session with a bad login", %{conn: conn} do
     conn = post conn, session_path(conn, :create), user: %{username: "testuser", password: "wrong"}
     refute get_session(conn, :current_user)
-    assert get_flash(conn, :error) == "Invalud username/password combination!"
+    assert get_flash(conn, :error) == "Invalid username/password combination!"
     assert redirected_to(conn) == page_path(conn, :index)
   end
 

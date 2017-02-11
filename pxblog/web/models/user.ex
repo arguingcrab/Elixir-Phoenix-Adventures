@@ -14,6 +14,8 @@ defmodule Pxblog.User do
     # Virtual Fields - Does not exist in DB, But needs to exist in User struct
     field :password, :string, virtual: true
     field :password_confirmation, :string, virtual: true
+
+    has_many :posts, Pxblog.Post
   end
 
   @doc """
