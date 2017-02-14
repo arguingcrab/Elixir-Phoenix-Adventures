@@ -92,9 +92,9 @@ defmodule Pxblog.PostController do
   end
 
   # Authorize users to do specific tasks with their own id
-  defp authorize_user(conn, _opts) do
+  defp authorize_user(conn, _) do
     user = get_session(conn, :current_user)
-    if user && Integer.to_string(user.id) == conn.params["user_id"] do
+    if user && (Integer.to_string(user.id) == conn.params["user_id"] || Pxblog.RoleChecker.is_admin?(user)) do
       conn
     else
       conn
