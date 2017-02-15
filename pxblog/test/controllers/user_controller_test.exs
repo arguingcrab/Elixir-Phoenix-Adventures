@@ -4,6 +4,8 @@ defmodule Pxblog.UserControllerTest do
   alias Pxblog.User
   alias Pxblog.TestHelper
 
+  import Pxblog.Factory
+
   @valid_attrs %{email: "test@example.com", username: "testuser"}
   @valid_create_attrs %{
     email: "test@example.com", password: "test1234",
@@ -12,10 +14,10 @@ defmodule Pxblog.UserControllerTest do
   @invalid_attrs %{}
 
   setup do
-    {:ok, user_role} = TestHelper.create_role(%{name: "user", admin: false})
-    {:ok, nonadmin_user} = TestHelper.create_user(user_role, %{email: "nonadmin@example.com", username: "nonadmin", password: "test1234", password_confirmation: "test1234"})
-    {:ok, admin_role} = TestHelper.create_role(%{name: "admin", admin: true})
-    {:ok, admin_user} = TestHelper.create_user(admin_role, %{email: "admin@example.com", username: "admin", password: "test1234", password_confirmation: "test1234"})
+    user_role = insert(:role)
+    nonadmin_user = insert(:user, role: user_role)
+    admin_role = insert(:role, admin: true)
+    admin_user = insert(:user, role: admin_role)
     {:ok, conn: build_conn(), admin_role: admin_role, user_role: user_role, nonadmin_user: nonadmin_user, admin_user: admin_user}
   end
 
@@ -34,9 +36,6 @@ defmodule Pxblog.UserControllerTest do
 
   @tag admin: true
   test "renders form for new resources", %{conn: conn, admin_user: admin_user} do
-    #conn = conn
-    #  |> login_user(admin_user)
-    #  |> get(user_path(conn, :new))
     conn = login_user(conn, admin_user)
     conn = get conn, user_path(conn, :new)
     assert html_response(conn, 200) =~ "New user"

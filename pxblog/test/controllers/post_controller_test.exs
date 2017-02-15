@@ -4,13 +4,19 @@ defmodule Pxblog.PostControllerTest do
   alias Pxblog.Post
   alias Pxblog.TestHelper
 
+  import Pxblog.Factory
+
   @valid_attrs %{body: "some content", title: "some content"}
   @invalid_attrs %{}
 
   setup do
-    {:ok, role} = TestHelper.create_role(%{name: "User Role", admin: false})
-    {:ok, user} = TestHelper.create_user(role, %{email: "test@example.com", username: "testuser", password: "test1234", password_confirmation: "test1234"})
-    {:ok, post} = TestHelper.create_post(user, %{title: "Test Post", body: "Test Body"})
+    # Replace all creation steps with Factory calls
+    # role gets populated from /insert/ statement creating the role
+    # > then used to build user from factory
+    # >> then used to create post associated with that user
+    role = insert(:role)
+    user = insert(:user, role: role)
+    post = insert(:post, user: user)
     conn = build_conn()
     |> login_user(user)
     {:ok, conn: conn, user: user, role: role, post: post}
