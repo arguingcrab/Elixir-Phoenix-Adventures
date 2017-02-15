@@ -3,6 +3,7 @@ defmodule Pxblog.PostController do
 
   plug :assign_user
   plug :authorize_user when action in [:new, :create, :update, :edit, :delete]
+  plug :set_authorization_flag when action in [:show]
 
   alias Pxblog.Post
 
@@ -99,14 +100,22 @@ defmodule Pxblog.PostController do
 
   # Authorize users to do specific tasks with their own id
   defp authorize_user(conn, _) do
-    user = get_session(conn, :current_user)
-    if user && (Integer.to_string(user.id) == conn.params["user_id"] || Pxblog.RoleChecker.is_admin?(user)) do
+    if is_authorized_user?(conn) do
       conn
     else
       conn
       |> put_flash(:error, "You are not authorized to modify that post!")
       |> redirect(to: page_path(conn, :index))
-      |> halt()
+      |> halt
     end
+  end
+
+  defp is_authorized_user?(conn) do
+    user = get_session(conn, :current_user)
+    (user && (Integer.to_string(user.id) == conn.params["user_id"] || Pxblog.RoleChecker.is_admin?(user)))
+  end
+
+  defp set_authorization_flag(conn, _opts) do
+    assign(conn, :author_or_admin, is_authorized_user?(conn))
   end
 end
