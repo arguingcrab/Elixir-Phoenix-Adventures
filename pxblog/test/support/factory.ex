@@ -8,6 +8,7 @@ defmodule Pxblog.Factory do
   alias Pxblog.Role
   alias Pxblog.User
   alias Pxblog.Post
+  alias Pxblog.Comment
 
   # fn x -> "Test Role #{x}" end
   # return Role struct that defines properties we want it to have
@@ -34,6 +35,15 @@ defmodule Pxblog.Factory do
       title: "Some Post",
       body: "And the body of some post",
       user: build(:user)
+    }
+  end
+
+  def comment_factory do
+    %Comment{
+      author: "Test User",
+      body: "Sample comment",
+      approved: false,
+      post: build(:post)
     }
   end
 end
