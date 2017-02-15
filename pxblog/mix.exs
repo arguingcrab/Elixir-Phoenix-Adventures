@@ -19,7 +19,7 @@ defmodule Pxblog.Mixfile do
   def application do
     [mod: {Pxblog, []},
      applications: [:phoenix, :phoenix_pubsub, :phoenix_html, :cowboy, :logger, :gettext,
-                    :phoenix_ecto, :postgrex, :ecto, :comeonin, :ex_machina]]
+                    :phoenix_ecto, :postgrex, :ecto, :comeonin, :ex_machina, :earmark]]
   end
 
   # Specifies which paths to compile per environment.
@@ -40,7 +40,8 @@ defmodule Pxblog.Mixfile do
      {:cowboy, "~> 1.0"},
      {:ecto, "~> 2.1.3"},
      {:comeonin, "~> 2.3"},
-     {:ex_machina, "~> 1.0"}]
+     {:ex_machina, "~> 1.0"},
+     {:earmark, "~> 1.0.1"}]
   end
 
   # Aliases are shortcuts or tasks specific to the current project.
