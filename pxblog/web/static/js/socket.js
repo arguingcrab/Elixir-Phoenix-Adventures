@@ -4,6 +4,7 @@
 // To use Phoenix channels, the first step is to import Socket
 // and connect at the socket path in "lib/my_app/endpoint.ex":
 import {Socket} from "phoenix"
+import $ from "jquery"
 
 let socket = new Socket("/socket", {params: {token: window.userToken}})
 
@@ -54,9 +55,108 @@ let socket = new Socket("/socket", {params: {token: window.userToken}})
 socket.connect()
 
 // Now that you are connected, you can join channels with a topic:
+
+/**
 let channel = socket.channel("topic:subtopic", {})
 channel.join()
   .receive("ok", resp => { console.log("Joined successfully", resp) })
   .receive("error", resp => { console.log("Unable to join", resp) })
 
 export default socket
+**/
+// GET postId from DOM
+const postId = $("#post-id").val();
+const channel = socket.channel(`comments:${postId}`, {});
+const CREATED_COMMENT = "CREATED_COMMENT";
+const APPROVED_COMMENT = "APPROVED_COMMENT";
+const DELETED_COMMENT = "DELETED_COMMENT";
+// Grab user token from meta tag
+const userToken = $("meta[name='channel_token']").attr("content");
+// Make sure we're connting with the user's token to persist user.id session
+const socket = new Socket("/socket", {params: {token: userToken}});
+// Connect to our socket
+socket.connect();
+
+const createComment = (payload) => `
+  <div id="comment-${payload.commentId}" class="comment" data-comment-id="${payload.commentId}">
+    <div class="row">
+      <div class="col-xs-4">
+        <strong class="comment-author">${payload.author}</strong>
+      </div>
+      <div class="col-xs-4">
+        <em>${payload.insertedAt}</em>
+      </div>
+      <div class="col-xs-4 text-right">
+        ${ userToken ? '<button class="btn btn-xs btn-primary approve">Approve</button> <button class="btn btn-xs btn-danger delete">Delete</button>' : '' }
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-12 comment-body">
+        ${payload.body}
+      </div>
+    </div>
+  </div>
+  `;
+const getCommentAuthor = () => $("#comment_author").val();
+const getCommentBody = () => $("#comment_body").val();
+const getTargetCommentId = (target) => $(target).parents(".comment").data("comment-id")
+const resetFields = () => {
+  $("#comment_author").val("")
+  $("#comment_body").val("")
+}
+
+// Push CREATED_COMMENT event to socket with appropriate val
+$(".create-comment").on("click", function(e){
+  e.preventDefault();
+  channel.push(CREATED_COMMENT, {author: getCommentAuthor(), body: getCommentBody(), postId});
+  resetFields();
+});
+
+// Push APPROVED_COMMENT event to socket with appropriate val
+$(".comments").on("click", ".approve", function(e){
+  e.preventDefault();
+  const commentId = getTargetCommentId(e.currentTarget);
+  // Get approved comment author
+  const author = $(`#comment-${commentId} .comment-author`).text().trim();
+  const body = $(`#comment-${commentId} .comment-body`).text().trim();
+  channel.push(APPROVED_COMMENT, { author, body, commentId, postId });
+});
+
+// Push DELETED_COMMENT event to socket only needing comment_id
+$(".comments").on("click", ".delete", function(e){
+  e.preventDefault();
+  const commentId = getTargetCommentId(e.currentTarget);
+  channel.push(DELETED_COMMENT, { commentId, postId });
+});
+
+channel.join()
+  .receive("ok", resp => { console.log("Joined successfully", resp) })
+  .receive("error", resp => { console.log("Unable to join", resp) })
+
+// Handles receiving CREATED_COMMENT event
+channel.on(CREATED_COMMENT, (payload) => {
+  // Don't append comment if !approved
+  if (!userToken && !payload.approved){ return; }
+  // Add to DOM
+  $(".comments h2").after(createComment(payload));
+});
+
+// Handles receiving APPROVED_COMMENT
+channel.on(APPROVED_COMMENT, (payload) => {
+  if($(`#comment-${payload.commentId}`).length === 0){
+    $(".comments h2").after(createComment(payload));
+  }
+  $(`#comment-${payload.commentId} .approve`).remove();
+});
+
+// Handles receiving DELETED_COMMENT
+channel.on(DELETED_COMMENT, (payload) => {
+  $(`#comment-${payload.commentId}`).remove();
+});
+
+export default socket
+// $("input[type=submit]").on("click", function(e){});
+$("input[type=submit]").on("click", (e) =>{
+  e.preventDefault();
+  channel.push(CREATED_COMMENT, { author: "test", body: "body"});
+});

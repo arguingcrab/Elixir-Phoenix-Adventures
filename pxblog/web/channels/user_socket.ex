@@ -2,7 +2,10 @@ defmodule Pxblog.UserSocket do
   use Phoenix.Socket
 
   ## Channels
-  # channel "room:*", Pxblog.RoomChannel
+  # Making comments live via Phoenix Channels
+  # mix phoenix.gen.channel Comment
+  # npm install --save-dev jquery
+  channel "comments:*", Pxblog.CommentChannel
 
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket
@@ -19,8 +22,20 @@ defmodule Pxblog.UserSocket do
   #
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
-  def connect(_params, socket) do
-    {:ok, socket}
+
+  @doc """
+  Pass token back to Phoenix and call PHoenix.Token.verify()
+  Pass token to verify val, token, max_age of token (2w)
+
+  We still want !logged_in to see live updates so we won't have user_id
+  """
+  def connect(%{"token" => token}, socket) do
+    case Phoenix.Token.verify(socket, "user", token, max_age: 1209600) do
+      {:ok, user_id} ->
+        {:ok, assign(socket, :user, user_id)}
+      {:error, reason} ->
+        {:ok, socket}
+    end
   end
 
   # Socket id's are topics that allow you to identify all sockets for a given user:
