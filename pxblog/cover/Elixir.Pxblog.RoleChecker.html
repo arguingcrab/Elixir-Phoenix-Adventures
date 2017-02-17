@@ -1,0 +1,22 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>cover/Elixir.Pxblog.RoleChecker.html</title>
+</head><body style='background-color: white; color: black'>
+<pre>
+File generated from /Users/zen/Developer/Elixir/phoenix/pxblog/web/models/role_checker.ex by COVER 2017-02-16 at 10:30:23
+
+****************************************************************************
+
+        |  defmodule Pxblog.RoleChecker do
+        |    alias Pxblog.Repo
+        |    alias Pxblog.Role
+        |  
+        |    def is_admin?(user) do
+<font color=red>     0..|      (role = Repo.get(Role, user.role_id)) &amp;&amp; role.admin</font>
+        |    end
+        |  end
+</pre>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>cover/Elixir.Pxblog.Post.html</title>
+</head><body style='background-color: white; color: black'>
+<pre>
+File generated from /Users/zen/Developer/Elixir/phoenix/pxblog/web/models/post.ex by COVER 2017-02-16 at 10:30:23
+
+****************************************************************************
+
+        |  defmodule Pxblog.Post do
+        |    use Pxblog.Web, :model
+        |  
+     4..|    schema "posts" do
+        |      field :title, :string
+        |      field :body, :string
+        |  
+        |      timestamps()
+        |  
+        |      belongs_to :user, Pxblog.User
+        |      has_many :comments, Pxblog.Comment
+        |    end
+        |  
+        |    @doc """
+        |    Builds a changeset based on the `struct` and `params`.
+        |    """
+        |    def changeset(struct, params \\ %{}) do
+        |      struct
+        |      |&gt; cast(params, [:title, :body])
+        |      |&gt; validate_required([:title, :body])
+        |      |&gt; strip_unsafe_body(params)
+        |    end
+        |  
+        |    def strip_unsafe_body(model, %{"body" =&gt; nil}) do
+        |      model
+        |    end
+        |  
+        |    #html_escape func() takes text and returns tuple on success of {:safe, cleaned_up_body}
+        |    def strip_unsafe_body(model, %{"body" =&gt; body}) do
+        |      {:safe, clean_body} = Phoenix.HTML.html_escape(body)
+        |      model |&gt; put_change(:body, clean_body)
+        |    end
+        |  
+        |    def strip_unsafe_body(model, _) do
+        |      model
+        |    end
+        |  end
+</pre>
+</body>
+</html>

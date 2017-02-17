@@ -22,5 +22,5 @@ import socket from "./socket"
 import $ from "jquery"
 
 if ($("body")){
-  console.log("works!")
+  console.log("this works!")
 }

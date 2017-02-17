@@ -1,0 +1,35 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>cover/Elixir.Pxblog.Comment.html</title>
+</head><body style='background-color: white; color: black'>
+<pre>
+File generated from /Users/zen/Developer/Elixir/phoenix/pxblog/web/models/comment.ex by COVER 2017-02-16 at 10:30:23
+
+****************************************************************************
+
+        |  defmodule Pxblog.Comment do
+        |    use Pxblog.Web, :model
+        |  
+<font color=red>     0..|    schema "comments" do</font>
+        |      field :author, :string
+        |      field :body, :string
+        |      field :approved, :boolean, default: false
+        |      belongs_to :post, Pxblog.Post
+        |  
+        |      timestamps()
+        |    end
+        |  
+        |    @doc """
+        |    Builds a changeset based on the `struct` and `params`.
+        |    """
+        |    def changeset(struct, params \\ %{}) do
+        |      struct
+        |      |&gt; cast(params, [:author, :body, :approved])
+        |      |&gt; validate_required([:author, :body, :approved])
+        |    end
+        |  end
+</pre>
+</body>
+</html>

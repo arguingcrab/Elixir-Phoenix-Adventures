@@ -1,0 +1,37 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>cover/Elixir.Pxblog.UserView.html</title>
+</head><body style='background-color: white; color: black'>
+<pre>
+File generated from /Users/zen/Developer/Elixir/phoenix/pxblog/web/views/user_view.ex by COVER 2017-02-16 at 10:30:23
+
+****************************************************************************
+
+<font color=red>     0..|  defmodule Pxblog.UserView do</font>
+        |    use Pxblog.Web, :view
+        |  
+        |    @moduledoc """
+        |    &amp;/&amp;1 - shorthand syntax for anon func()
+        |    Equiv to
+        |    Enum.map(roles, fn role -&gt; ["(hash)(curly-open)role.name(curly-close)": role.id] end)
+        |  
+        |    Map returns a list of smaller keyword lists where role.name = key, role.id = val
+        |  
+        |    roles = [%Role{name: "Admin Role", id: 1}, %{Role{name: "User Role", id: 2}}]
+        |    returns as
+        |    [["Admin Role": 1], ["User Role": 2]]
+        |  
+        |    Pipe to List.flatten which compresses it to a list, and not a list of lists
+        |    ["Admin Role": 1, "User Role": 2]
+        |    """
+        |    def roles_for_select(roles) do
+        |      roles
+        |      |&gt; Enum.map(&amp;["#{&amp;1.name}": &amp;1.id])
+        |      |&gt; List.flatten
+        |    end
+        |  end
+</pre>
+</body>
+</html>

@@ -8,7 +8,7 @@ defmodule Pxblog.Post do
     timestamps()
 
     belongs_to :user, Pxblog.User
-    has_many :comments, Pxblog.Comment
+    has_many :comments, Pxblog.Comment, on_delete: :delete_all
   end
 
   @doc """

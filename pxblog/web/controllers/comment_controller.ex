@@ -42,8 +42,9 @@ defmodule Pxblog.CommentController do
   Update comment
   """
   #def update(conn, _), do: conn
-  def update(conn, %{"id" => id, "post_id" => post_id, "comment" => comment_params}) do
-    post = Repo.get!(Post, post_id) |> Repo.preload(:user)
+  def update(conn, %{"id" => id, "comment" => comment_params}) do
+    # post = Repo.get!(Post, post_id) |> Repo.preload(:user)
+    post = conn.assigns[:post]
     comment = Repo.get!(Comment, id)
     changeset = Comment.changeset(comment, comment_params)
 
@@ -59,8 +60,9 @@ defmodule Pxblog.CommentController do
     end
   end
 
-  def delete(conn, %{"id" => id, "post_id" => post_id}) do
-    post = Repo.get!(Post, post_id) |> Repo.preload(:user)
+  def delete(conn, %{"id" => id}) do
+    post = conn.assigns[:post]
+    # post = Repo.get!(Post, post_id) |> Repo.preload(:user)
     Repo.get!(Comment, id) |> Repo.delete!
     conn
     |> put_flash(:info, "Deleted comment!")

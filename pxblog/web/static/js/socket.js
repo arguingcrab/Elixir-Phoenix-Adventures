@@ -6,7 +6,7 @@
 import {Socket} from "phoenix"
 import $ from "jquery"
 
-let socket = new Socket("/socket", {params: {token: window.userToken}})
+//let socket = new Socket("/socket", {params: {token: window.userToken}})
 
 // When you connect, you'll often need to authenticate the client.
 // For example, imagine you have an authentication plug, `MyAuth`,
@@ -51,8 +51,15 @@ let socket = new Socket("/socket", {params: {token: window.userToken}})
 //
 // Finally, pass the token on connect as below. Or remove it
 // from connect if you don't care about authentication.
+// Make sure we're connting with the user's token to persist user.id session
+// Grab user token from meta tag
+const userToken = $("meta[name='channel_token']").attr("content");
+const socket = new Socket("/socket", {params: {token: userToken}});
+// const socket = new Socket("/socket", {params: {token: userToken}});
 
-socket.connect()
+// Connect to our socket
+socket.connect();
+// socket.connect()
 
 // Now that you are connected, you can join channels with a topic:
 
@@ -64,18 +71,15 @@ channel.join()
 
 export default socket
 **/
-// GET postId from DOM
-const postId = $("#post-id").val();
-const channel = socket.channel(`comments:${postId}`, {});
 const CREATED_COMMENT = "CREATED_COMMENT";
 const APPROVED_COMMENT = "APPROVED_COMMENT";
 const DELETED_COMMENT = "DELETED_COMMENT";
-// Grab user token from meta tag
-const userToken = $("meta[name='channel_token']").attr("content");
-// Make sure we're connting with the user's token to persist user.id session
-const socket = new Socket("/socket", {params: {token: userToken}});
-// Connect to our socket
-socket.connect();
+// GET postId from DOM
+const postId = $("#post-id").val();
+const channel = socket.channel(`comments:${postId}`, {});
+channel.join()
+  .receive("ok", resp => { console.log("Channel Joined:-", resp) })
+  .receive("error", resp => { console.log("Unable to join channel", resp) })
 
 const createComment = (payload) => `
   <div id="comment-${payload.commentId}" class="comment" data-comment-id="${payload.commentId}">
@@ -87,7 +91,7 @@ const createComment = (payload) => `
         <em>${payload.insertedAt}</em>
       </div>
       <div class="col-xs-4 text-right">
-        ${ userToken ? '<button class="btn btn-xs btn-primary approve">Approve</button> <button class="btn btn-xs btn-danger delete">Delete</button>' : '' }
+        ${ userToken ? '<button class="btn btn-xs btn-primary approve">Approve</button> <button class="btn btn-xs btn-danger delete">Delete</button>' : ''}
       </div>
     </div>
     <div class="row">
@@ -106,32 +110,34 @@ const resetFields = () => {
 }
 
 // Push CREATED_COMMENT event to socket with appropriate val
-$(".create-comment").on("click", function(e){
+$(".create-comment").on("click", (e) => {
   e.preventDefault();
   channel.push(CREATED_COMMENT, {author: getCommentAuthor(), body: getCommentBody(), postId});
+  console.log($("#comment_author").val()+"create"+postId);
   resetFields();
 });
 
 // Push APPROVED_COMMENT event to socket with appropriate val
-$(".comments").on("click", ".approve", function(e){
+$(".comments").on("click", ".approve", (e) => {
   e.preventDefault();
+  console.log("approve");
   const commentId = getTargetCommentId(e.currentTarget);
   // Get approved comment author
   const author = $(`#comment-${commentId} .comment-author`).text().trim();
   const body = $(`#comment-${commentId} .comment-body`).text().trim();
   channel.push(APPROVED_COMMENT, { author, body, commentId, postId });
+  // channel.push(APPROVED_COMMENT, { author, body, commentId, postId });
+  console.log(author+"/"+body+"/"+commentId+"/"+postId);
 });
 
 // Push DELETED_COMMENT event to socket only needing comment_id
-$(".comments").on("click", ".delete", function(e){
+$(".comments").on("click", ".delete", (e) => {
   e.preventDefault();
+  console.log("delete");
   const commentId = getTargetCommentId(e.currentTarget);
   channel.push(DELETED_COMMENT, { commentId, postId });
+  console.log(commentId+"/"+postId);
 });
-
-channel.join()
-  .receive("ok", resp => { console.log("Joined successfully", resp) })
-  .receive("error", resp => { console.log("Unable to join", resp) })
 
 // Handles receiving CREATED_COMMENT event
 channel.on(CREATED_COMMENT, (payload) => {
@@ -139,10 +145,12 @@ channel.on(CREATED_COMMENT, (payload) => {
   if (!userToken && !payload.approved){ return; }
   // Add to DOM
   $(".comments h2").after(createComment(payload));
+  console.log(payload);
 });
 
 // Handles receiving APPROVED_COMMENT
 channel.on(APPROVED_COMMENT, (payload) => {
+  // console.log("approve pt 2");
   if($(`#comment-${payload.commentId}`).length === 0){
     $(".comments h2").after(createComment(payload));
   }
@@ -151,12 +159,15 @@ channel.on(APPROVED_COMMENT, (payload) => {
 
 // Handles receiving DELETED_COMMENT
 channel.on(DELETED_COMMENT, (payload) => {
+  console.log("delete part 2");
   $(`#comment-${payload.commentId}`).remove();
 });
 
-export default socket
+
 // $("input[type=submit]").on("click", function(e){});
-$("input[type=submit]").on("click", (e) =>{
-  e.preventDefault();
-  channel.push(CREATED_COMMENT, { author: "test", body: "body"});
-});
+// $("input[type=submit]").on("click", (e) =>{
+//   e.preventDefault();
+//   channel.push(CREATED_COMMENT, { author: "test", body: "body"});
+// });
+
+export default socket;

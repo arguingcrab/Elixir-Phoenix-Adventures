@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>cover/Elixir.Pxblog.CommentHelper.html</title>
+</head><body style='background-color: white; color: black'>
+<pre>
+File generated from /Users/zen/Developer/Elixir/phoenix/pxblog/web/channels/comment_helper.ex by COVER 2017-02-16 at 10:30:23
+
+****************************************************************************
+
+        |  defmodule Pxblog.CommentHelper do
+        |    @moduledoc """
+        |    Handling DB interactions required for creating/approving/deleting comments
+        |    """
+        |    alias Pxblog.Comment
+        |    alias Pxblog.Post
+        |    alias Pxblog.User
+        |    alias Pxblog.Repo
+        |  
+        |    import Ecto, only: [build_assoc: 2]
+        |  
+        |    @doc """
+        |    Fetch post via get_post()
+        |    Build changeset off the post to build assoc comment with body&amp;&amp;author vars
+        |    Return Repo.insert()
+        |    """
+        |    def create(%{"postId" =&gt; post_id, "body" =&gt; body, "author" =&gt; author}, _socket) do
+     1..|      post = get_post(post_id)
+     1..|      changeset = post
+        |        |&gt; build_assoc(:comments)
+        |        |&gt; Comment.changeset(%{body: body, author: author})
+     1..|      Repo.insert(changeset)
+        |    end
+        |  
+        |    @doc """
+        |    Pattern match (post_id&amp;&amp;comment_id) &amp;&amp; (verified user_id from socket)
+        |    Call helper authorize_and_perform and pass anon()
+        |    Fetches comment, updates approved to true via changeset
+        |    Repo.update()
+        |    """
+        |    def approve(%{"postId" =&gt; post_id, "commentId" =&gt; comment_id}, %{assigns: %{user: user_id}}) do
+     1..|      authorize_and_perform(post_id, user_id, fn -&gt;
+     1..|        comment = Repo.get!(Comment, comment_id)
+     1..|        changeset = Comment.changeset(comment, %{approved: true})
+     1..|        Repo.update(changeset)
+        |      end)
+        |    end
+        |  
+        |    def approve(_params, %{}), do: {:error, "User is not authorized"}
+        |    def approve(_params, nil), do: {:error, "User is not authorized"}
+        |  
+        |    @doc """
+        |    Pattern match (post_id&amp;&amp;comment_id) &amp;&amp; (verified user_id from socket)
+        |    Call helper authorize_and_perform and pass anon()
+        |    Fetches comment and delete
+        |    """
+        |    def delete(%{"postId" =&gt; post_id, "commentId" =&gt; comment_id}, %{assigns: %{user: user_id}}) do
+     1..|      authorize_and_perform(post_id, user_id, fn -&gt;
+     1..|        comment = Repo.get!(Comment, comment_id)
+     1..|        Repo.delete(comment)
+        |      end)
+        |    end
+        |  
+        |    def delete(_params, %{}), do: {:error, "User is not authorized"}
+        |    def delete(_params, _), do: {:error, "User is not authorized"}
+        |  
+        |    @doc """
+        |    Helper()
+        |    Pass post_id&amp;&amp;user_id
+        |    Call is_authorized_user? to return true false
+        |    Call anon() - action
+        |    Otherwise return tuple {:error, msg} for catch
+        |    """
+        |    defp authorize_and_perform(post_id, user_id, action) do
+     2..|      post = get_post(post_id)
+     2..|      user = get_user(user_id)
+     2..|      if is_authorized_user?(user, post) do
+     2..|        action.()
+        |      else
+        |        {:error, "User is not authorized"}
+        |      end
+        |    end
+        |  
+        |    # Fetches user
+        |    defp get_user(user_id) do
+     2..|      Repo.get!(User, user_id)
+        |    end
+        |  
+        |    # Fetches post
+        |    defp get_post(post_id) do
+        |      Repo.get!(Post, post_id)
+     3..|      |&gt; Repo.preload([:user, :comments])
+        |    end
+        |  
+        |    # Checks if user is authorized
+        |    defp is_authorized_user?(user, post) do
+     2..|      (user &amp;&amp; (user.id == post.user_id || Pxblog.RoleChecker.is_admin?(user)))
+        |    end
+        |  end
+</pre>
+</body>
+</html>

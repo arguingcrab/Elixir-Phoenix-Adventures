@@ -1,6 +1,7 @@
 defmodule Pxblog.PostController do
   use Pxblog.Web, :controller
 
+  plug :scrub_params, "post" when action in [:create, :update]
   plug :assign_user
   plug :authorize_user when action in [:new, :create, :update, :edit, :delete]
   plug :set_authorization_flag when action in [:show]
@@ -87,7 +88,7 @@ defmodule Pxblog.PostController do
           user  ->  assign(conn, :user, user)
         end
       _ ->
-        conn
+        invalid_user(conn)
     end
   end
 

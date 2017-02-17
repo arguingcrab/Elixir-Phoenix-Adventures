@@ -1,10 +1,17 @@
 defmodule Pxblog.UserSocket do
   use Phoenix.Socket
+  @moduledoc """
+  Socket Handler(s)
+  Holds a single connection to the server / combining sockets over one connection
 
+  Authenticate & Identify a socket connection and allow you to set default
+  socket assigns for use in all channels
+  """
   ## Channels
   # Making comments live via Phoenix Channels
   # mix phoenix.gen.channel Comment
   # npm install --save-dev jquery
+  # Channel Routes match topic strings & dispatch matching requests
   channel "comments:*", Pxblog.CommentChannel
 
   ## Transports
@@ -49,4 +56,5 @@ defmodule Pxblog.UserSocket do
   #
   # Returning `nil` makes this socket anonymous.
   def id(_socket), do: nil
+  # def id(socket), do: "users_socket:#{socket.assigns.user_id}"
 end

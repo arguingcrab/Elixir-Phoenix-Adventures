@@ -36,6 +36,9 @@ defmodule Pxblog.CommentHelper do
     end)
   end
 
+  # def approve(_params, %{}), do: {:error, "User is not authorized"}
+  # def approve(_params, nil), do: {:error, "User is not authorized"}
+
   @doc """
   Pattern match (post_id&&comment_id) && (verified user_id from socket)
   Call helper authorize_and_perform and pass anon()
@@ -47,6 +50,9 @@ defmodule Pxblog.CommentHelper do
       Repo.delete(comment)
     end)
   end
+
+  def delete(_params, %{}), do: {:error, "User is not authorized"}
+  # def delete(_params, _), do: {:error, "User is not authorized"}
 
   @doc """
   Helper()

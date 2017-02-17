@@ -59,11 +59,13 @@ exports.config = {
 
   modules: {
     autoRequire: {
-      "js/app.js": ["web/static/js/app"]
+      "js/app.js": ["web/static/js/app"],
+      "js/socket.js": ["web/static/js/socket"]
     }
   },
 
   npm: {
-    enabled: true
+    enabled: true,
+    whitelist: ["phoenix", "phoenix_html", "jquery"]
   }
 };
