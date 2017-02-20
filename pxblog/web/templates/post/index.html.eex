@@ -5,8 +5,6 @@
     <tr>
       <th>Title</th>
       <th>Body</th>
-
-      <th></th>
     </tr>
   </thead>
   <tbody>
@@ -15,14 +13,20 @@
       <td><%= post.title %></td>
       <td><%= post.body %></td>
 
-      <td class="text-right">
-        <%= link "Show", to: user_post_path(@conn, :show, @user, post), class: "btn btn-default btn-xs" %>
-        <%= link "Edit", to: user_post_path(@conn, :edit, @user, post), class: "btn btn-default btn-xs" %>
-        <%= link "Delete", to: user_post_path(@conn, :delete, @user, post), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %>
-      </td>
-    </tr>
+      <%= if current_user = @conn.assigns[:current_user] do %>
+        <td class="text-right">
+          <%= link "Show", to: user_post_path(@conn, :show, post.user, post), class: "btn btn-default btn-xs" %>
+          <%= if (current_user.id == post.user_id) do %>
+            <%= link "Edit", to: user_post_path(@conn, :edit, post.user, post), class: "btn btn-default btn-xs" %>
+          <% end %>
+          <%= if (current_user.id == post.user_id) || (current_user && Pxblog.RoleChecker.is_admin?(current_user)) do %>
+            <%= link "Delete", to: user_post_path(@conn, :delete, post.user, post), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %>
+          <% end %>
+        </td>
+      <% end %>
 <% end %>
   </tbody>
 </table>
-
-<%= link "New post", to: user_post_path(@conn, :new, @user) %>
+<%= if current_user = @conn.assigns[:current_user] do %>
+  <%= link "New post", to: user_post_path(@conn, :new, current_user.id), class: "button expanded large" %>
+<% end %>

@@ -12,7 +12,14 @@ defmodule Pxblog.SessionController do
 
   def new(conn, _params) do
     # pass conn, template(-eex), +vars
-    render conn, "new.html", changeset: User.changeset(%User{})
+    user = get_session(conn, :current_user)
+    if user do
+      conn
+      |> put_flash(:info, "Already Logged in!")
+      |> redirect(to: page_path(conn, :index))
+    else
+      render conn, "new.html", changeset: User.changeset(%User{})
+    end
   end
 
   @doc """

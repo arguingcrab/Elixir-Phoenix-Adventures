@@ -1,1 +1,12 @@
 /* This file is for your main application css. */
+.top-bar li, .top-bar-left{
+  display: inline-block;
+}
+
+.top-bar-left .menu {
+  padding-left: 0;
+}
+
+.top-bar-right{
+  float:right
+}

@@ -7,7 +7,11 @@ defmodule Pxblog.Router do
     plug :fetch_flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug Pxblog.CurrentUserPlug
   end
+
+  # Plug Pxblog.CurrentUserPlug allows @conn.assigns[:current_user]
+  # when we need to access current logged_in user
 
   pipeline :api do
     plug :accepts, ["json"]
@@ -28,6 +32,8 @@ defmodule Pxblog.Router do
       resources "/comments", CommentController, only: [:create, :delete, :update]
     end
     resources "/sessions", SessionController, only: [:new, :create, :delete]
+    # !logged_in display
+    resources "/posts", PostController, only: [:index]
   end
 
   # Other scopes may use custom stacks.

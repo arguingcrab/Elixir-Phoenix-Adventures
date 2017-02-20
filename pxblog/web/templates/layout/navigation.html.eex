@@ -1,0 +1,24 @@
+<div class="top-bar">
+  <div class="top-bar-left">
+    <ul class="menu">
+      <li><%= link "Home", to: page_path(@conn, :index) %></li>
+      <li><%= link "Posts", to: post_path(@conn, :index) %></li>
+      <%= if current_user = @conn.assigns[:current_user] do %>
+        <li><%= link "My Posts", to: user_post_path(@conn, :index, current_user.id) %></li>
+        <li><%= link "New Post", to: user_post_path(@conn, :new, current_user.id) %></li>
+      <% end %>
+      <li><%= link "Users", to: user_path(@conn, :index) %></li>
+    </ul>
+  </div>
+  <div class="top-bar-right">
+    <ul class="menu">
+      <%= if current_user = @conn.assigns[:current_user] do %>
+        Logged in as
+        <li><%= link current_user.username, to: user_path(@conn, :edit, current_user.id) %></li> /
+        <li><%= link "Log out", to: session_path(@conn, :delete, current_user.id), method: :delete %></li>
+      <% else %>
+        <li><%= link "Login", to: session_path(@conn, :new, class: "button") %></li>
+      <% end %>
+    </ul>
+  </div>
+</div>

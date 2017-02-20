@@ -5,7 +5,6 @@
     <tr>
       <th>Username</th>
       <th>Email</th>
-      <th>Password digest</th>
 
       <th></th>
     </tr>
@@ -15,13 +14,15 @@
     <tr>
       <td><%= user.username %></td>
       <td><%= user.email %></td>
-      <td><%= user.password_digest %></td>
-
-      <td class="text-right">
-        <%= link "Show", to: user_path(@conn, :show, user), class: "btn btn-default btn-xs" %>
-        <%= link "Edit", to: user_path(@conn, :edit, user), class: "btn btn-default btn-xs" %>
-        <%= link "Delete", to: user_path(@conn, :delete, user), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %>
-      </td>
+      <%= if current_user = @conn.assigns[:current_user] do %>
+        <td class="text-right">
+          <%= link "Show", to: user_path(@conn, :show, user), class: "btn btn-default btn-xs" %>
+          <%= link "Edit", to: user_path(@conn, :edit, user), class: "btn btn-default btn-xs" %>
+          <%= if current_user && Pxblog.RoleChecker.is_admin?(current_user) do %>
+            <%= link "Delete", to: user_path(@conn, :delete, user), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %>
+          <% end %>
+        </td>
+      <% end %>
     </tr>
 <% end %>
   </tbody>

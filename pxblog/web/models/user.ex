@@ -15,7 +15,7 @@ defmodule Pxblog.User do
     field :password, :string, virtual: true
     field :password_confirmation, :string, virtual: true
 
-    has_many :posts, Pxblog.Post
+    has_many :posts, Pxblog.Post, on_delete: :delete_all
     belongs_to :role, Pxblog.Role
   end
 

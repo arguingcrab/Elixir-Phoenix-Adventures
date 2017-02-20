@@ -5,8 +5,8 @@ defmodule Pxblog.UserController do
   alias Pxblog.Role
 
   plug :scrub_params, "user" when action in [:create, :update]
-  plug :authorize_admin when action in [:new, :create]
-  plug :authorize_user when action in [:edit, :update, :delete]
+  plug :authorize_admin when action in [:new, :create, :delete]
+  plug :authorize_user when action in [:edit, :update]
 
   def index(conn, _params) do
     users = Repo.all(User)
@@ -87,7 +87,8 @@ defmodule Pxblog.UserController do
 
   defp authorize_admin(conn, _) do
     user = get_session(conn, :current_user)
-    if user && Pxblog.RoleChecker.is_admin?(user) do
+    if user && Pxblog.RoleChecker.is_admin?(get_session(conn, :current_user)) do
+    # if user do
       conn
     else
       conn
